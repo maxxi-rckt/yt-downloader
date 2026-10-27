@@ -30,7 +30,7 @@ jobs:
         working-directory: helper
         run: |
           go vet ./...
-          go build -o "../ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe)" .
+          go build -o "../ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe || true)" .
 
       - name: Install (downloads yt-dlp, ffmpeg, deno and registers with browsers)
         run: ./ytdownloader install --no-pause
@@ -46,7 +46,7 @@ jobs:
       - name: Protocol test (ping + MP3 conversion of a CC-licensed clip)
         run: |
           data="$(printf %s "$YTDL_DATA_DIR" | tr "\\\\" /)"
-          bin="$data/ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe)"
+          bin="$data/ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe || true)"
           out="$(printf %s "${{ runner.temp }}" | tr "\\\\" /)/out"
           node tools/test-helper.js "$bin" \
             '{"type":"ping","rid":1}' \
@@ -59,7 +59,7 @@ jobs:
         continue-on-error: true
         run: |
           data="$(printf %s "$YTDL_DATA_DIR" | tr "\\\\" /)"
-          bin="$data/ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe)"
+          bin="$data/ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe || true)"
           node tools/test-helper.js "$bin" '{"type":"info","rid":1,"url":"https://www.youtube.com/watch?v=aqz-KE-bpKQ"}'
 
       - name: Installer script (macOS/Linux, against the latest release)
