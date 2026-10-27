@@ -1,0 +1,80 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  helper:
+    name: Helper (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    env:
+      YTDL_DATA_DIR: ${{ github.workspace }}/.ytdl-data
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: helper/go.mod
+
+      - name: Vet and build
+        working-directory: helper
+        run: |
+          go vet ./...
+          go build -o "../ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe)" .
+
+      - name: Install (downloads yt-dlp, ffmpeg, deno and registers with browsers)
+        run: ./ytdownloader install --no-pause
+
+      - name: Check registration
+        run: |
+          case "$RUNNER_OS" in
+            Windows) reg query 'HKCU\Software\Google\Chrome\NativeMessagingHosts\com.mchy.ytdl' ;;
+            macOS)   cat "$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.mchy.ytdl.json" ;;
+            Linux)   cat "$HOME/.config/google-chrome/NativeMessagingHosts/com.mchy.ytdl.json" ;;
+          esac
+
+      - name: Protocol test (ping + MP3 conversion of a CC-licensed clip)
+        run: |
+          data="$(printf %s "$YTDL_DATA_DIR" | tr "\\\\" /)"
+          bin="$data/ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe)"
+          out="$(printf %s "${{ runner.temp }}" | tr "\\\\" /)/out"
+          node tools/test-helper.js "$bin" \
+            '{"type":"ping","rid":1}' \
+            "{\"type\":\"download\",\"id\":\"a\",\"url\":\"https://download.blender.org/peach/trailer/trailer_400p.ogg\",\"kind\":\"audio\",\"format\":\"mp3\",\"quality\":\"128\",\"outDir\":\"${out//\\//}\"}"
+          ls -la "$out"
+          ls "$out"/*.mp3
+
+      # YouTube often blocks datacenter IPs, so this one is informative only.
+      - name: YouTube info (informative)
+        continue-on-error: true
+        run: |
+          data="$(printf %s "$YTDL_DATA_DIR" | tr "\\\\" /)"
+          bin="$data/ytdownloader$([ "$RUNNER_OS" = Windows ] && echo .exe)"
+          node tools/test-helper.js "$bin" '{"type":"info","rid":1,"url":"https://www.youtube.com/watch?v=aqz-KE-bpKQ"}'
+
+      - name: Installer script (macOS/Linux, against the latest release)
+        if: runner.os != 'Windows' && github.event_name == 'workflow_dispatch'
+        run: |
+          export YTDL_DATA_DIR="${{ runner.temp }}/ytdl-script"
+          sh docs/install.sh --no-register
+          test -x "$YTDL_DATA_DIR/ytdownloader"
+          test -f "$YTDL_DATA_DIR/extension/manifest.json"
+
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: for f in extension/*.js tools/*.js; do node --check "$f"; done
+      - name: Manifest is valid JSON with the fixed key
+        run: node -e 'const m=require("./extension/manifest.json"); if(!m.key||m.manifest_version!==3) process.exit(1); console.log(m.name, m.version)'

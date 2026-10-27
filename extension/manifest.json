@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "YT Downloader",
+  "version": "1.1.0",
+  "description": "Descarga vídeos y audio de YouTube en un clic.",
+  "homepage_url": "https://__GH_USER__.github.io/yt-downloader/",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoAXJ8eyXSOqiAR1UBVIzOJp7PxsEZ9+YP5ICPLRbye7C+/4kQDZvTeH9r2rwylTXSEl42tpgVKxPpMR8fIgZEO7Yxxx/hJXnuXdm/uxtFTAsJgKaCIqFOLgWgQstoplb5wkvgGvUPgqSxXAotq5lrHoXdkKA+iB67x6DWaBWpZzsQFRALO23654HV4WMFzwxhIjuofY7IN+yJ8wxyUMpEh4QsU6/zGJsrFMKXi7dzMnyQ+xNLw3Ct9O3UYWzlTWE0P9GQEFENLl+Ry8d0zcB1nJqfkiy4gCXeASjNG5/X1w4TA5EoW2oElAem6thIm1m4WKLwsAb+PcPLITsdbWW7QIDAQAB",
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "YT Downloader",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "nativeMessaging",
+    "storage",
+    "tabs",
+    "notifications"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://youtu.be/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.youtube.com/*",
+        "*://m.youtube.com/*",
+        "*://music.youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

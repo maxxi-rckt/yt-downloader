@@ -1,0 +1,95 @@
+#ytdl-pill {
+  --ytdl-accent: #ff3b4e;
+  --ytdl-accent-2: #ff7a45;
+  --ytdl-pct: 0%;
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  height: 36px;
+  margin-left: 8px;
+  border-radius: 18px;
+  overflow: visible;
+  font-family: "Roboto", "Arial", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ytdl-accent), var(--ytdl-accent-2));
+  box-shadow: 0 2px 10px rgba(255, 59, 78, .3);
+  flex: none;
+  z-index: 10;
+}
+#ytdl-pill button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+#ytdl-pill svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+#ytdl-pill .ytdl-icon { display: inline-flex; }
+#ytdl-pill .ytdl-main {
+  position: relative;
+  padding: 0 12px 0 12px;
+  border-radius: 18px 0 0 18px;
+  overflow: hidden;
+  min-width: 118px;
+  font-variant-numeric: tabular-nums;
+}
+#ytdl-pill .ytdl-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: var(--ytdl-pct);
+  background: rgba(255, 255, 255, .22);
+  transition: width .3s ease;
+  pointer-events: none;
+}
+#ytdl-pill .ytdl-main > * { position: relative; }
+#ytdl-pill .ytdl-caret {
+  padding: 0 8px 0 6px;
+  border-left: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 0 18px 18px 0;
+}
+#ytdl-pill button:hover { background: rgba(255, 255, 255, .12); }
+#ytdl-pill.ytdl-busy .ytdl-icon { animation: ytdl-bounce 1s infinite ease-in-out; }
+#ytdl-pill.ytdl-done { background: linear-gradient(135deg, #1fb86a, #2fd27e); box-shadow: 0 2px 10px rgba(47, 210, 126, .3); }
+#ytdl-pill.ytdl-error { background: #3a3a3a; }
+@keyframes ytdl-bounce { 50% { transform: translateY(2px); } }
+
+#ytdl-pill .ytdl-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #212121;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  display: flex;
+  flex-direction: column;
+  z-index: 2200;
+}
+#ytdl-pill .ytdl-menu[hidden] { display: none; }
+#ytdl-pill .ytdl-menu button {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 400;
+  text-align: left;
+  color: #f1f1f1;
+}
+#ytdl-pill .ytdl-menu button:hover { background: rgba(255, 255, 255, .1); }
+#ytdl-pill .ytdl-menu hr { width: 100%; margin: 4px 0; border: 0; border-top: 1px solid rgba(255, 255, 255, .12); }
+
+html:not([dark]) #ytdl-pill .ytdl-menu { background: #fff; box-shadow: 0 10px 30px rgba(0, 0, 0, .18); }
+html:not([dark]) #ytdl-pill .ytdl-menu button { color: #0f0f0f; }
+html:not([dark]) #ytdl-pill .ytdl-menu button:hover { background: rgba(0, 0, 0, .06); }
+html:not([dark]) #ytdl-pill .ytdl-menu hr { border-top-color: rgba(0, 0, 0, .1); }
+
+/* Shorts: floating pill */
+#ytdl-pill.ytdl-float { position: fixed; right: 24px; bottom: 24px; margin: 0; z-index: 2100; }
+#ytdl-pill.ytdl-float .ytdl-menu { top: auto; bottom: calc(100% + 8px); }

@@ -1,0 +1,10 @@
+# private key that signs the extension ID — never publish it
+tools/private.pem
+dist/
+helper/ytdownloader
+helper/*.exe
+/ytdownloader
+/ytdownloader.exe
+.ytdl-data/
+# legacy Node host artifacts
+host/

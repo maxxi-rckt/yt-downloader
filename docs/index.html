@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YT Downloader</title>
+  <meta name="description" content="Extensión gratuita para Chrome, Edge y Brave que descarga vídeo (MP4 hasta 4K) y audio (MP3/M4A) de YouTube. Windows, macOS y Linux.">
+  <link rel="icon" href="icon.png">
+  <meta property="og:title" content="YT Downloader">
+  <meta property="og:description" content="Descarga vídeo y audio de YouTube en un clic. Gratis, sin anuncios, todo en tu ordenador.">
+  <meta property="og:image" content="icon.png">
+  <style>
+    :root {
+      --bg: #0d0d10; --surface: #17171c; --surface-2: #212128; --line: #2b2b34;
+      --text: #f4f4f7; --muted: #9b9ba8; --accent: #ff3b4e; --accent-2: #ff7a45; --ok: #2fd27e; --kofi: #29abe0;
+      --radius: 18px; color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) { --bg: #f7f7f9; --surface: #fff; --surface-2: #f0f0f4; --line: #e3e3ea; --text: #14141a; --muted: #686875; color-scheme: light; }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font: 16px/1.6 Inter, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    a { color: inherit; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    [hidden] { display: none !important; }
+
+    /* nav */
+    nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); background: color-mix(in srgb, var(--bg) 80%, transparent); border-bottom: 1px solid var(--line); }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; text-decoration: none; }
+    .brand img { width: 28px; height: 28px; }
+    .nav-links { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+    .nav-links a { color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+    .lang { padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+    @media (max-width: 640px) { .nav-links a:not(.keep) { display: none; } }
+
+    /* hero */
+    .hero { position: relative; padding: 72px 0 56px; }
+    .hero::before { content: ""; position: absolute; inset: -200px -20% auto; height: 620px; background: radial-gradient(closest-side, rgba(255, 59, 78, .22), transparent 70%); pointer-events: none; z-index: -1; }
+    .hero .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+    @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } }
+    .eyebrow { display: inline-flex; gap: 8px; align-items: center; padding: 5px 12px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .eyebrow b { color: var(--ok); }
+    h1 { margin-top: 18px; font-size: clamp(36px, 6vw, 58px); line-height: 1.05; letter-spacing: -.035em; }
+    h1 span { background: linear-gradient(120deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sub { margin-top: 18px; font-size: 18px; color: var(--muted); max-width: 520px; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 13px; border: 0; font: inherit; font-weight: 650; text-decoration: none; cursor: pointer; transition: transform .1s, filter .2s; }
+    .btn:active { transform: scale(.98); }
+    .btn.primary { color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 30px rgba(255, 59, 78, .35); }
+    .btn.primary:hover, .btn.kofi:hover { filter: brightness(1.08); }
+    .btn.ghost { background: var(--surface); border: 1px solid var(--line); }
+    .btn.kofi { color: #fff; background: var(--kofi); box-shadow: 0 10px 30px rgba(41, 171, 224, .3); }
+    .btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .platforms { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+    /* mock popup */
+    .mock { justify-self: center; width: min(360px, 100%); padding: 14px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0, 0, 0, .45); transform: rotate(1.5deg); }
+    .mock-top { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .mock-top img { width: 20px; }
+    .mock-thumb { margin-top: 12px; aspect-ratio: 16/9; border-radius: 12px; position: relative; overflow: hidden; background: linear-gradient(135deg, #3a1d5c, #c2416b 55%, #f2a65a); }
+    .mock-thumb::after { content: "▶"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 34px; color: rgba(255, 255, 255, .85); }
+    .mock-thumb span { position: absolute; right: 8px; bottom: 8px; z-index: 1; padding: 1px 6px; border-radius: 5px; background: rgba(0, 0, 0, .75); color: #fff; font-size: 11px; font-weight: 600; }
+    .mock-title { margin-top: 10px; font-weight: 650; font-size: 14px; }
+    .mock-ch { font-size: 12px; color: var(--muted); }
+    .mock-seg { display: grid; grid-template-columns: 1fr 1fr; margin-top: 12px; padding: 4px; border-radius: 11px; background: var(--surface-2); font-size: 13px; font-weight: 600; text-align: center; }
+    .mock-seg div { padding: 6px; border-radius: 8px; color: var(--muted); }
+    .mock-seg .on { background: var(--surface); color: var(--text); box-shadow: 0 2px 6px rgba(0, 0, 0, .25); }
+    .mock-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 10px; font-size: 12px; text-align: center; }
+    .mock-chips div { padding: 7px 4px; border-radius: 9px; border: 1.5px solid var(--line); }
+    .mock-chips b { display: block; font-size: 12.5px; }
+    .mock-chips small { color: var(--muted); font-size: 10px; }
+    .mock-chips .on { border-color: var(--accent); background: rgba(255, 59, 78, .12); }
+    .mock-chips .on b { color: var(--accent); }
+    .mock-btn { margin-top: 12px; padding: 11px; border-radius: 11px; text-align: center; color: #fff; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .mock-job { display: flex; gap: 10px; align-items: center; margin-top: 12px; padding: 8px; border-radius: 11px; border: 1px solid var(--line); font-size: 12px; }
+    .mock-job i { flex: none; width: 46px; height: 26px; border-radius: 5px; background: linear-gradient(135deg, #1d3b5c, #41c2a0); }
+    .mock-job div { flex: 1; }
+    .mock-bar { height: 4px; margin-top: 5px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+    .mock-bar::after { content: ""; display: block; width: 64%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); animation: grow 3s ease-in-out infinite alternate; }
+    @keyframes grow { from { width: 18%; } to { width: 92%; } }
+
+    /* sections */
+    section.block { padding: 64px 0; }
+    h2 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -.025em; text-align: center; }
+    .lead { margin: 10px auto 0; max-width: 620px; text-align: center; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 36px; }
+    .card { padding: 22px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+    .card .ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: rgba(255, 59, 78, .13); font-size: 20px; }
+    .card h3 { margin-top: 14px; font-size: 17px; }
+    .card p { margin-top: 6px; color: var(--muted); font-size: 15px; }
+
+    /* download */
+    .dl { max-width: 760px; margin: 36px auto 0; }
+    .tabs { display: flex; gap: 6px; padding: 5px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); width: fit-content; margin: 0 auto; }
+    .tabs button { padding: 8px 16px; border: 0; border-radius: 10px; background: none; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+    .tabs button.on { background: var(--surface-2); color: var(--text); }
+    .panel { margin-top: 18px; padding: 26px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+    .steps { list-style: none; padding: 0; counter-reset: s; display: grid; gap: 18px; }
+    .steps li { position: relative; padding-left: 46px; }
+    .steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 800; font-size: 14px; }
+    .steps b { display: block; }
+    .steps p { color: var(--muted); font-size: 15px; margin-top: 2px; }
+    .cmd { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 6px 6px 6px 14px; border-radius: 11px; background: var(--bg); border: 1px solid var(--line); }
+    .cmd code { flex: 1; overflow-x: auto; white-space: nowrap; font: 13.5px/1.5 ui-monospace, Consolas, monospace; }
+    .cmd button { flex: none; padding: 7px 12px; border: 0; border-radius: 8px; background: var(--surface-2); color: var(--text); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .note { margin-top: 10px; padding: 10px 14px; border-radius: 11px; background: rgba(255, 180, 60, .1); border: 1px solid rgba(255, 180, 60, .3); font-size: 14px; }
+    kbd { padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line); background: var(--surface-2); font: 13px ui-monospace, Consolas, monospace; }
+
+    /* kofi */
+    .support { display: grid; grid-template-columns: auto 1fr auto; gap: 24px; align-items: center; margin-top: 8px; padding: 30px; border-radius: 24px; background: linear-gradient(135deg, rgba(41, 171, 224, .16), rgba(255, 59, 78, .1)); border: 1px solid var(--line); }
+    .support .cup { font-size: 54px; }
+    .support h2 { text-align: left; }
+    .support p { color: var(--muted); margin-top: 6px; }
+    @media (max-width: 700px) { .support { grid-template-columns: 1fr; text-align: center; } .support h2 { text-align: center; } }
+
+    /* faq */
+    .faq { max-width: 760px; margin: 32px auto 0; display: grid; gap: 10px; }
+    details { padding: 16px 20px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+    summary { font-weight: 650; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::after { content: "+"; color: var(--muted); font-size: 20px; line-height: 1; }
+    details[open] summary::after { content: "–"; }
+    details p { margin-top: 10px; color: var(--muted); }
+
+    footer { padding: 40px 0 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; text-align: center; }
+    footer p + p { margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap">
+      <a class="brand" href="#"><img src="icon.png" alt="">YT Downloader</a>
+      <div class="nav-links">
+        <a href="#funciones" data-i18n="nav.features">Funciones</a>
+        <a href="#descargar" data-i18n="nav.download">Descargar</a>
+        <a href="#faq">FAQ</a>
+        <a class="keep" href="https://github.com/__GH_USER__/yt-downloader" target="_blank">GitHub</a>
+        <button class="lang" id="lang">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow"><b>●</b> <span data-i18n="hero.badge">Gratis · Código abierto · Sin anuncios</span></span>
+        <h1 data-i18n-html="hero.title">Descarga vídeos y música de YouTube <span>en un clic</span></h1>
+        <p class="sub" data-i18n="hero.sub">Una extensión para Chrome, Edge y Brave que guarda vídeo en MP4 hasta 4K o audio en MP3 y M4A. Todo ocurre en tu ordenador: sin servidores, sin cuentas y sin rastreo.</p>
+        <div class="cta">
+          <a class="btn primary" id="hero-dl" href="#descargar">
+            <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+            <span id="hero-dl-label" data-i18n="hero.cta">Descargar gratis</span>
+          </a>
+          <a class="btn kofi" href="https://ko-fi.com/__KOFI_USER__" target="_blank">☕ <span data-i18n="hero.kofi">Invítame a un café</span></a>
+        </div>
+        <p class="platforms">Windows · macOS · Linux — Chrome · Edge · Brave · Vivaldi</p>
+      </div>
+
+      <div class="mock" aria-hidden="true">
+        <div class="mock-top"><img src="icon.png" alt="">YT Downloader</div>
+        <div class="mock-thumb"><span>10:34</span></div>
+        <div class="mock-title" data-i18n="mock.title">Mi vídeo favorito</div>
+        <div class="mock-ch" data-i18n="mock.ch">Canal de ejemplo</div>
+        <div class="mock-seg"><div class="on" data-i18n="mock.video">Vídeo</div><div>Audio</div></div>
+        <div class="mock-chips">
+          <div><b>4K</b><small>2160p</small></div>
+          <div class="on"><b>Full HD</b><small>1080p</small></div>
+          <div><b>HD</b><small>720p</small></div>
+        </div>
+        <div class="mock-btn" data-i18n="mock.btn">Descargar</div>
+        <div class="mock-job"><i></i><div><b data-i18n="mock.job">Mi canción · MP3 320</b><div class="mock-bar"></div></div></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="block" id="funciones">
+    <div class="wrap">
+      <h2 data-i18n="feat.title">Todo lo que necesitas, nada que sobre</h2>
+      <p class="lead" data-i18n="feat.lead">Pensada para que descargar sea tan fácil como darle a «Me gusta».</p>
+      <div class="grid">
+        <div class="card"><div class="ic">⬇️</div><h3 data-i18n="f1.t">Botón dentro de YouTube</h3><p data-i18n="f1.p">Aparece junto a «Me gusta» y «Compartir», también en los Shorts. Un clic y listo.</p></div>
+        <div class="card"><div class="ic">🎬</div><h3 data-i18n="f2.t">Hasta 4K</h3><p data-i18n="f2.p">MP4 en 4K, 1440p, 1080p, 720p… Solo te muestra las calidades que el vídeo tiene de verdad.</p></div>
+        <div class="card"><div class="ic">🎧</div><h3 data-i18n="f3.t">Música en MP3 o M4A</h3><p data-i18n="f3.p">MP3 a 320 o 128 kbps, o M4A original, con carátula y título incluidos.</p></div>
+        <div class="card"><div class="ic">🔒</div><h3 data-i18n="f4.t">Privada de verdad</h3><p data-i18n="f4.p">Usa yt-dlp en tu ordenador. Tus vídeos nunca pasan por servidores de terceros.</p></div>
+        <div class="card"><div class="ic">⚡</div><h3 data-i18n="f5.t">Cola y progreso</h3><p data-i18n="f5.p">Varias descargas a la vez, con velocidad, tiempo restante, historial y notificaciones.</p></div>
+        <div class="card"><div class="ic">🔄</div><h3 data-i18n="f6.t">Siempre al día</h3><p data-i18n="f6.p">Si YouTube cambia algo, un botón actualiza el motor de descarga en segundos.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="descargar">
+    <div class="wrap">
+      <h2 data-i18n="dl.title">Instálala en 2 minutos</h2>
+      <p class="lead" data-i18n="dl.lead">Dos piezas: un pequeño programa que descarga y la extensión del navegador.</p>
+      <div class="dl">
+        <div class="tabs" role="tablist">
+          <button data-os="win">Windows</button>
+          <button data-os="mac">macOS</button>
+          <button data-os="linux">Linux</button>
+        </div>
+
+        <div class="panel" data-panel="win">
+          <ol class="steps">
+            <li>
+              <b data-i18n="w1.t">Descarga y descomprime</b>
+              <p data-i18n="w1.p">Descomprime el ZIP en cualquier carpeta (por ejemplo, Descargas).</p>
+              <a class="btn primary" style="margin-top:12px" href="https://github.com/__GH_USER__/yt-downloader/releases/latest/download/YTDownloader-windows-x64.zip">
+                <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+                <span data-i18n="w1.btn">Descargar para Windows</span>
+              </a>
+            </li>
+            <li>
+              <b data-i18n="w2.t">Abre YTDownloader.exe</b>
+              <p data-i18n="w2.p">Descarga los componentes (yt-dlp, ffmpeg) y lo prepara todo. Tarda un minuto.</p>
+              <div class="note" data-i18n-html="w2.note">Si aparece «Windows protegió tu PC», pulsa <b>Más información → Ejecutar de todos modos</b>. Sale porque el programa es nuevo y no está firmado; el código es público en GitHub.</div>
+            </li>
+            <li>
+              <b data-i18n="s3.t">Carga la extensión</b>
+              <p data-i18n-html="s3.p">Abre <kbd>chrome://extensions</kbd>, activa <b>Modo de desarrollador</b>, pulsa <b>Cargar descomprimida</b> y elige la carpeta que el instalador te abre.</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="panel" data-panel="mac" hidden>
+          <ol class="steps">
+            <li>
+              <b data-i18n="m1.t">Abre la Terminal y pega esto</b>
+              <p data-i18n="m1.p">Descarga el programa para tu Mac (Apple Silicon o Intel) y lo instala.</p>
+              <div class="cmd"><code>curl -fsSL https://__GH_USER__.github.io/yt-downloader/install.sh | sh</code><button class="copy" data-i18n="copy">Copiar</button></div>
+            </li>
+            <li>
+              <b data-i18n="s3.t">Carga la extensión</b>
+              <p data-i18n-html="m3.p">Abre <kbd>chrome://extensions</kbd>, activa <b>Modo de desarrollador</b>, pulsa <b>Cargar descomprimida</b> y elige <kbd>~/Library/Application Support/YTDownloader/extension</kbd> (pulsa <kbd>⌘⇧G</kbd> para pegar la ruta).</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="panel" data-panel="linux" hidden>
+          <ol class="steps">
+            <li>
+              <b data-i18n="l1.t">Abre un terminal y pega esto</b>
+              <p data-i18n="l1.p">Funciona en x64 y ARM64. Necesita curl y tar (vienen en casi todas las distribuciones).</p>
+              <div class="cmd"><code>curl -fsSL https://__GH_USER__.github.io/yt-downloader/install.sh | sh</code><button class="copy" data-i18n="copy">Copiar</button></div>
+            </li>
+            <li>
+              <b data-i18n="s3.t">Carga la extensión</b>
+              <p data-i18n-html="l3.p">Abre <kbd>chrome://extensions</kbd>, activa <b>Modo de desarrollador</b>, pulsa <b>Cargar descomprimida</b> y elige <kbd>~/.local/share/ytdownloader/extension</kbd>.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="support">
+        <div class="cup">☕</div>
+        <div>
+          <h2 data-i18n="k.t">¿Te ahorra tiempo? Invítame a un café</h2>
+          <p data-i18n="k.p">YT Downloader es gratis, sin anuncios y sin letra pequeña. Lo mantengo en mis ratos libres; si te resulta útil, una donación voluntaria en Ko-fi me ayuda a seguir mejorándolo.</p>
+        </div>
+        <a class="btn kofi" href="https://ko-fi.com/__KOFI_USER__" target="_blank" data-i18n="k.btn">Apoyar en Ko-fi</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <h2 data-i18n="faq.title">Preguntas frecuentes</h2>
+      <div class="faq">
+        <details><summary data-i18n="q1">¿Por qué no está en la Chrome Web Store?</summary><p data-i18n="a1">Google no permite extensiones que descarguen de YouTube en su tienda. Por eso se instala manualmente; es igual de segura y el código es público.</p></details>
+        <details><summary data-i18n="q2">¿Es seguro? ¿Qué datos recoge?</summary><p data-i18n="a2">No recoge nada. No hay servidores, cuentas ni analíticas: la extensión habla solo con el programa local, que usa yt-dlp y ffmpeg, dos herramientas libres muy conocidas. Puedes revisar todo el código en GitHub.</p></details>
+        <details><summary data-i18n="q3">Ha dejado de funcionar, ¿qué hago?</summary><p data-i18n="a3">YouTube cambia a menudo. Abre la extensión → Ajustes → «Actualizar yt-dlp». Si sigue fallando, vuelve a ejecutar el instalador o abre una incidencia en GitHub.</p></details>
+        <details><summary data-i18n="q4">¿Funciona en Edge, Brave u Opera?</summary><p data-i18n="a4">Sí en Chrome, Edge, Brave, Vivaldi y Chromium. Firefox y Safari no están soportados por ahora.</p></details>
+        <details><summary data-i18n="q5">¿Dónde se guardan los archivos?</summary><p data-i18n="a5">En Descargas/YouTube. Puedes cambiar la carpeta en los ajustes de la extensión.</p></details>
+        <details><summary data-i18n="q6">¿Cómo la desinstalo?</summary><p data-i18n-html="a6">Quita la extensión en <kbd>chrome://extensions</kbd> y ejecuta <kbd>YTDownloader.exe uninstall</kbd> (Windows) o <kbd>~/.local/share/ytdownloader/ytdownloader uninstall</kbd> (Linux) / <kbd>"~/Library/Application Support/YTDownloader/ytdownloader" uninstall</kbd> (macOS).</p></details>
+        <details><summary data-i18n="q7">¿Es legal?</summary><p data-i18n="a7">La herramienta es legal; lo que importa es el uso. Descarga solo contenido propio, con licencia libre (Creative Commons) o con permiso del autor, y respeta las condiciones de YouTube.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p data-i18n="foot.1">Hecho con ❤️ · Código abierto bajo licencia MIT</p>
+      <p><a href="https://github.com/__GH_USER__/yt-downloader" target="_blank">GitHub</a> · <a href="https://ko-fi.com/__KOFI_USER__" target="_blank">Ko-fi</a> · <span data-i18n="foot.2">No afiliado a YouTube ni a Google.</span></p>
+    </div>
+  </footer>
+
+  <script>
+    const EN = {
+      'nav.features': 'Features', 'nav.download': 'Download',
+      'hero.badge': 'Free · Open source · No ads',
+      'hero.title': 'Download YouTube videos and music <span>in one click</span>',
+      'hero.sub': 'An extension for Chrome, Edge and Brave that saves MP4 video up to 4K or MP3 and M4A audio. Everything happens on your computer: no servers, no accounts, no tracking.',
+      'hero.cta': 'Download for free', 'hero.kofi': 'Buy me a coffee',
+      'mock.title': 'My favourite video', 'mock.ch': 'Example channel', 'mock.video': 'Video', 'mock.btn': 'Download', 'mock.job': 'My song · MP3 320',
+      'feat.title': 'Everything you need, nothing you don’t', 'feat.lead': 'Designed to make downloading as easy as hitting “Like”.',
+      'f1.t': 'A button inside YouTube', 'f1.p': 'It sits next to “Like” and “Share”, Shorts included. One click and done.',
+      'f2.t': 'Up to 4K', 'f2.p': 'MP4 in 4K, 1440p, 1080p, 720p… It only shows the qualities the video really has.',
+      'f3.t': 'Music as MP3 or M4A', 'f3.p': 'MP3 at 320 or 128 kbps, or original M4A, with cover art and title.',
+      'f4.t': 'Truly private', 'f4.p': 'It runs yt-dlp on your computer. Your videos never go through third-party servers.',
+      'f5.t': 'Queue and progress', 'f5.p': 'Several downloads at once, with speed, time left, history and notifications.',
+      'f6.t': 'Always up to date', 'f6.p': 'If YouTube changes something, one button updates the download engine in seconds.',
+      'dl.title': 'Install it in 2 minutes', 'dl.lead': 'Two pieces: a small program that downloads, and the browser extension.',
+      'w1.t': 'Download and unzip', 'w1.p': 'Unzip it into any folder (for example, Downloads).', 'w1.btn': 'Download for Windows',
+      'w2.t': 'Open YTDownloader.exe', 'w2.p': 'It fetches the components (yt-dlp, ffmpeg) and sets everything up. It takes a minute.',
+      'w2.note': 'If you see “Windows protected your PC”, click <b>More info → Run anyway</b>. It shows up because the program is new and unsigned; the code is public on GitHub.',
+      's3.t': 'Load the extension',
+      's3.p': 'Open <kbd>chrome://extensions</kbd>, turn on <b>Developer mode</b>, click <b>Load unpacked</b> and pick the folder the installer opens.',
+      'm1.t': 'Open Terminal and paste this', 'm1.p': 'It downloads the program for your Mac (Apple Silicon or Intel) and installs it.',
+      'm3.p': 'Open <kbd>chrome://extensions</kbd>, turn on <b>Developer mode</b>, click <b>Load unpacked</b> and pick <kbd>~/Library/Application Support/YTDownloader/extension</kbd> (press <kbd>⌘⇧G</kbd> to paste the path).',
+      'l1.t': 'Open a terminal and paste this', 'l1.p': 'Works on x64 and ARM64. Needs curl and tar (shipped with almost every distro).',
+      'l3.p': 'Open <kbd>chrome://extensions</kbd>, turn on <b>Developer mode</b>, click <b>Load unpacked</b> and pick <kbd>~/.local/share/ytdownloader/extension</kbd>.',
+      'copy': 'Copy',
+      'k.t': 'Saves you time? Buy me a coffee', 'k.p': 'YT Downloader is free, ad-free and no strings attached. I maintain it in my spare time; if it’s useful to you, a voluntary donation on Ko-fi helps me keep improving it.', 'k.btn': 'Support on Ko-fi',
+      'faq.title': 'FAQ',
+      'q1': 'Why isn’t it on the Chrome Web Store?', 'a1': 'Google doesn’t allow extensions that download from YouTube in its store. That’s why it’s installed manually; it’s just as safe and the code is public.',
+      'q2': 'Is it safe? What data does it collect?', 'a2': 'None. There are no servers, accounts or analytics: the extension only talks to the local program, which uses yt-dlp and ffmpeg, two well-known free tools. You can review all the code on GitHub.',
+      'q3': 'It stopped working, what do I do?', 'a3': 'YouTube changes often. Open the extension → Settings → “Update yt-dlp”. If it still fails, run the installer again or open an issue on GitHub.',
+      'q4': 'Does it work in Edge, Brave or Opera?', 'a4': 'Yes in Chrome, Edge, Brave, Vivaldi and Chromium. Firefox and Safari aren’t supported for now.',
+      'q5': 'Where are files saved?', 'a5': 'In Downloads/YouTube. You can change the folder in the extension settings.',
+      'q6': 'How do I uninstall it?', 'a6': 'Remove the extension in <kbd>chrome://extensions</kbd> and run <kbd>YTDownloader.exe uninstall</kbd> (Windows) or <kbd>~/.local/share/ytdownloader/ytdownloader uninstall</kbd> (Linux) / <kbd>"~/Library/Application Support/YTDownloader/ytdownloader" uninstall</kbd> (macOS).',
+      'q7': 'Is it legal?', 'a7': 'The tool is legal; what matters is how you use it. Only download your own content, freely licensed (Creative Commons) content, or content you have permission for, and respect YouTube’s terms.',
+      'foot.1': 'Made with ❤️ · Open source under the MIT license', 'foot.2': 'Not affiliated with YouTube or Google.',
+    };
+
+    // ---- language ----
+    const ES = {};
+    document.querySelectorAll('[data-i18n]').forEach((el) => (ES[el.dataset.i18n] = el.textContent));
+    document.querySelectorAll('[data-i18n-html]').forEach((el) => (ES[el.dataset.i18nHtml] = el.innerHTML));
+    function setLang(lang) {
+      const dict = lang === 'en' ? EN : ES;
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach((el) => (el.textContent = dict[el.dataset.i18n] ?? ES[el.dataset.i18n]));
+      document.querySelectorAll('[data-i18n-html]').forEach((el) => (el.innerHTML = dict[el.dataset.i18nHtml] ?? ES[el.dataset.i18nHtml]));
+      document.getElementById('lang').textContent = lang === 'en' ? 'ES' : 'EN';
+      try { localStorage.setItem('lang', lang); } catch {}
+      updateHeroLabel();
+    }
+    document.getElementById('lang').onclick = () => setLang(document.documentElement.lang === 'en' ? 'es' : 'en');
+
+    // ---- OS detection / tabs ----
+    const ua = (navigator.userAgentData?.platform || navigator.platform || navigator.userAgent).toLowerCase();
+    const detected = ua.includes('win') ? 'win' : ua.includes('mac') ? 'mac' : ua.includes('linux') || ua.includes('x11') ? 'linux' : 'win';
+    function showOS(os) {
+      document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b.dataset.os === os));
+      document.querySelectorAll('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== os));
+    }
+    document.querySelectorAll('.tabs button').forEach((b) => (b.onclick = () => showOS(b.dataset.os)));
+    showOS(detected);
+
+    function updateHeroLabel() {
+      const en = document.documentElement.lang === 'en';
+      const name = { win: 'Windows', mac: 'macOS', linux: 'Linux' }[detected];
+      document.getElementById('hero-dl-label').textContent = (en ? 'Download for ' : 'Descargar para ') + name;
+    }
+
+    document.querySelectorAll('.copy').forEach((b) => (b.onclick = () => {
+      navigator.clipboard.writeText(b.previousElementSibling.textContent).then(() => {
+        const t = b.textContent;
+        b.textContent = '✓';
+        setTimeout(() => (b.textContent = t), 1500);
+      });
+    }));
+
+    let saved = null;
+    try { saved = localStorage.getItem('lang'); } catch {}
+    setLang(saved || ((navigator.language || 'es').startsWith('es') ? 'es' : 'en'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bienvenido a YT Downloader</title>
+  <style>
+    :root {
+      --bg: #0f0f12; --surface: #18181d; --surface-2: #222229; --line: #2c2c35;
+      --text: #f3f3f6; --muted: #9a9aa6; --accent: #ff3b4e; --accent-2: #ff7a45; --ok: #2fd27e; --kofi: #29abe0;
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root { --bg: #f6f6f8; --surface: #fff; --surface-2: #efeff3; --line: #e2e2e8; --text: #15151a; --muted: #6d6d78; color-scheme: light; }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { background: var(--bg); color: var(--text); font: 15px/1.55 "Segoe UI Variable Text", "Segoe UI", Inter, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+    main { max-width: 760px; margin: 0 auto; padding: 56px 20px 64px; }
+    .hero { text-align: center; }
+    .hero img { width: 84px; height: 84px; filter: drop-shadow(0 10px 30px rgba(255, 59, 78, .4)); }
+    h1 { margin-top: 18px; font-size: 34px; letter-spacing: -.02em; }
+    .lead { margin-top: 8px; color: var(--muted); font-size: 17px; }
+    .card { margin-top: 28px; padding: 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+    .status { display: flex; gap: 14px; align-items: flex-start; }
+    .dot { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; font-weight: 800; color: #fff; background: var(--muted); }
+    .ok .dot { background: var(--ok); }
+    .bad .dot { background: var(--accent); }
+    .status h2 { font-size: 17px; }
+    .status p { color: var(--muted); margin-top: 2px; }
+    code { display: block; margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); font: 13px/1.5 Consolas, ui-monospace, monospace; word-break: break-all; user-select: all; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 16px; border: 0; border-radius: 11px; font: inherit; font-weight: 600; color: #fff; text-decoration: none; cursor: pointer; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .btn.ghost { color: var(--text); background: var(--surface-2); border: 1px solid var(--line); }
+    .btn.kofi { background: var(--kofi); }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-top: 28px; }
+    .step { padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    .step b { display: grid; place-items: center; width: 28px; height: 28px; margin-bottom: 10px; border-radius: 9px; background: rgba(255, 59, 78, .14); color: var(--accent); }
+    .step h3 { font-size: 15px; }
+    .step p { margin-top: 4px; color: var(--muted); font-size: 14px; }
+    .kofi-box { display: flex; gap: 18px; align-items: center; background: linear-gradient(135deg, rgba(41, 171, 224, .14), rgba(255, 59, 78, .08)); }
+    .kofi-box .cup { flex: none; font-size: 40px; }
+    .kofi-box p { color: var(--muted); margin-top: 4px; }
+    .fine { margin-top: 26px; text-align: center; color: var(--muted); font-size: 13px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <img src="icons/128.png" alt="">
+      <h1>¡Bienvenido a YT Downloader!</h1>
+      <p class="lead">Descarga vídeos y música de YouTube en un clic. Gratis, sin anuncios y sin enviar nada a ningún servidor.</p>
+    </section>
+
+    <section class="card status" id="status">
+      <div class="dot" id="status-dot">…</div>
+      <div>
+        <h2 id="status-title">Comprobando el helper…</h2>
+        <p id="status-text">Un momento.</p>
+        <div id="install" hidden>
+          <p id="install-win" hidden>Descarga el instalador para Windows y ábrelo con doble clic. Si Windows muestra «Windows protegió tu PC», pulsa <b>Más información → Ejecutar de todos modos</b>.</p>
+          <p id="install-unix" hidden>Abre la <b>Terminal</b> y pega este comando:</p>
+          <code id="install-cmd" hidden></code>
+          <a class="btn" id="install-link" target="_blank">Descargar el instalador</a>
+          <button class="btn ghost" id="copy" hidden>Copiar comando</button>
+          <button class="btn ghost" id="recheck">Ya lo he instalado</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="steps">
+      <div class="step"><b>1</b><h3>Abre un vídeo</h3><p>Junto a «Me gusta» y «Compartir» aparece el botón <strong>Descargar</strong>.</p></div>
+      <div class="step"><b>2</b><h3>Elige formato</h3><p>Un clic usa tu formato por defecto; la flecha ofrece MP4 hasta 4K, MP3 o M4A.</p></div>
+      <div class="step"><b>3</b><h3>Más opciones</h3><p>Fija la extensión en la barra: desde su icono eliges la calidad, ves el historial y cambias la carpeta.</p></div>
+    </section>
+
+    <section class="card kofi-box">
+      <div class="cup">☕</div>
+      <div>
+        <h2>¿Te gusta? Invítame a un café</h2>
+        <p>YT Downloader es un proyecto personal y gratuito. Si te resulta útil, una pequeña donación en Ko-fi me ayuda a mantenerlo al día.</p>
+        <a class="btn kofi kofi-link" target="_blank">Apoyar en Ko-fi</a>
+      </div>
+    </section>
+
+    <p class="fine">Descarga solo contenido propio, con licencia libre o con permiso del autor. · <a id="site-link" target="_blank" style="color:inherit">Web del proyecto</a></p>
+  </main>
+  <script src="config.js"></script>
+  <script src="welcome.js"></script>
+</body>
+</html>
