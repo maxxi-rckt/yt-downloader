@@ -18,7 +18,11 @@ host.stdout.on('data', (d) => {
   }
 });
 host.stderr.pipe(process.stderr);
-host.on('close', () => process.exit(failed || waiting > 0 ? 1 : 0));
+host.on('close', (code, signal) => {
+  if (waiting > 0) console.error(`helper exited early (code ${code}, signal ${signal})`);
+  process.exitCode = failed || waiting > 0 ? 1 : 0;
+});
+host.on('error', (e) => { console.error('spawn failed:', e.message); process.exitCode = 1; });
 for (const a of msgs) {
   const body = Buffer.from(a), h = Buffer.alloc(4);
   h.writeUInt32LE(body.length);
