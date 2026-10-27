@@ -5,9 +5,9 @@
   <b>Windows · macOS · Linux</b> — sin servidores, sin cuentas, sin anuncios.
 </p>
 <p align="center">
-  <a href="https://__GH_USER__.github.io/yt-downloader/"><b>🌐 Web e instrucciones</b></a> ·
-  <a href="https://github.com/__GH_USER__/yt-downloader/releases/latest"><b>⬇️ Descargar</b></a> ·
-  <a href="https://ko-fi.com/__KOFI_USER__"><b>☕ Apoyar en Ko-fi</b></a>
+  <a href="https://maxxi-rckt.github.io/yt-downloader/"><b>🌐 Web e instrucciones</b></a> ·
+  <a href="https://github.com/maxxi-rckt/yt-downloader/releases/latest"><b>⬇️ Descargar</b></a> ·
+  <a href="https://ko-fi.com/maxxirckt"><b>☕ Apoyar en Ko-fi</b></a>
 </p>
 
 ---
@@ -15,12 +15,12 @@
 ## Instalación
 
 **Windows:**
-1. Descarga [`YTDownloader-windows-x64.zip`](https://github.com/__GH_USER__/yt-downloader/releases/latest/download/YTDownloader-windows-x64.zip) y descomprímelo.
+1. Descarga [`YTDownloader-windows-x64.zip`](https://github.com/maxxi-rckt/yt-downloader/releases/latest/download/YTDownloader-windows-x64.zip) y descomprímelo.
 2. Abre `YTDownloader.exe`. Si sale «Windows protegió tu PC», pulsa *Más información → Ejecutar de todos modos*.
 
 **macOS / Linux:**
 ```sh
-curl -fsSL https://__GH_USER__.github.io/yt-downloader/install.sh | sh
+curl -fsSL https://maxxi-rckt.github.io/yt-downloader/install.sh | sh
 ```
 
 **En todos los sistemas, el último paso:** abre `chrome://extensions`, activa *Modo de desarrollador*, pulsa *Cargar descomprimida* y elige la carpeta `extension`. El instalador te dice cuál es.
@@ -57,4 +57,4 @@ Descarga solo contenido propio, con licencia libre o con permiso del autor. Este
 
 ## Licencia
 
-[MIT](LICENSE). Si te resulta útil, [invítame a un café ☕](https://ko-fi.com/__KOFI_USER__).
+[MIT](LICENSE). Si te resulta útil, [invítame a un café ☕](https://ko-fi.com/maxxirckt).

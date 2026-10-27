@@ -1,9 +1,9 @@
 #!/bin/sh
 # YT Downloader installer for macOS and Linux.
-#   curl -fsSL https://__GH_USER__.github.io/yt-downloader/install.sh | sh
+#   curl -fsSL https://maxxi-rckt.github.io/yt-downloader/install.sh | sh
 set -eu
 
-REPO="__GH_USER__/yt-downloader"
+REPO="maxxi-rckt/yt-downloader"
 
 case "$(uname -s)" in
   Darwin) os=macos ;;
